@@ -1,15 +1,24 @@
 {
   "name": "vue-file-tree",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.2.1",
+  "description": "这是一个文件树组件",
+  "main": "dist/vue-file-tree.common.js",
+  "keywords": [
+    "file-tree",
+    "fileTree",
+    "文件树"
+  ],
   "scripts": {
+    "start": "yarn serve",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build --target lib --name vue-file-tree src/components/FileTree/Tree.vue",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "pug": "^3.0.0",
+    "pug-plain-loader": "^1.0.0",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
     "vue-property-decorator": "^8.4.2",
@@ -20,10 +29,8 @@
     "@types/chai": "^4.2.11",
     "@types/mocha": "^5.2.4",
     "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-router": "~4.5.0",
     "@vue/cli-plugin-typescript": "~4.5.0",
     "@vue/cli-plugin-unit-mocha": "~4.5.0",
-    "@vue/cli-plugin-vuex": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "@vue/test-utils": "^1.0.3",
     "chai": "^4.1.2",

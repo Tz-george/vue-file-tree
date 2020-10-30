@@ -1,29 +1,8 @@
 # vue-file-tree
 
-## Project setup
-```
-yarn install
-```
+## 使用方法
+1、npm install vue-file-tree
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+2、在需要的地方使用 import VueFileTree from "vue-file-tree"即可
 
-### Compiles and minifies for production
-```
-yarn build
-```
 
-### Run your unit tests
-```
-yarn test:unit
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
