@@ -1,17 +1,23 @@
 <template lang="pug">
-  .Tree
+  .Tree()
     NodeList(:value="root" ref="nodeList" :path="sourcePath" @click="nodeListClick($event, 0)")
     NodeList(v-for="(item, index) in nodeLists" ref="nodeLists" :key="index" :value="item" @click="nodeListClick($event, index + 1)")
+    EmptyNodeList
+    EmptyNodeList
 </template>
 
 <script lang="ts">
-import {Component, Emit, Prop, Provide, Vue} from 'vue-property-decorator';
+import {Component, Emit, Prop, Provide, ProvideReactive, Vue} from 'vue-property-decorator';
 import {Loading, Node as NodeInfo} from './classDef';
 import Node from '@/components/FileTree/Node.vue';
 import NodeList from '@/components/FileTree/NodeList.vue';
+import EmptyNodeList from '@/components/FileTree/EmptyNodeList.vue';
+import {typeOf} from '@/utils/utils';
+
+const nodeBackup = [];
 
 @Component({
-  components: {NodeList, Node},
+  components: {EmptyNodeList, NodeList, Node},
 })
 export default class Tree extends Vue {
 
@@ -19,18 +25,22 @@ export default class Tree extends Vue {
     return {
       name: this.sourcePath,
       leaf: false,
-      children: this.data,
+      children: this.value,
     };
   }
 
+  public value: NodeInfo[] = [];
+  @Provide()
   public nodeLists: NodeInfo[] = [];
   public loadingList: Loading[] = [];
+  @ProvideReactive()
   public nowNode: NodeInfo | null = null;
   public nowNodePath: string = '';
   public $refs!: {
     nodeList: NodeList,
     nodeLists: NodeList[],
   };
+
   @Prop(Function)
   private readonly load!: (node: NodeInfo, path: string) => {};
 
@@ -48,15 +58,15 @@ export default class Tree extends Vue {
   @Provide()
   private readonly emptyText!: string;
 
-  @Emit('click') public click() {
+  @Emit('click')
+  public click() {
     return {node: this.nowNode, path: this.nowNodePath};
   }
 
   public path(node: NodeInfo, index: number) {
     return [
       ...this.sourcePath.split('/'),
-      ...this.nodeLists.map((i) => i.name).splice(0, index),
-      node.name]
+      ...this.nodeLists.map((i) => i.name).splice(0, index), node.name]
         .join('/')
         .replace(/\/+/g, '/');
   }
@@ -80,7 +90,8 @@ export default class Tree extends Vue {
 
       if (!node.children) {
         this.loadingList[index].loading = true;
-        await this.load(node, this.nowNodePath);
+        const data = await this.load(node, this.nowNodePath);
+        this.$set(node, 'children', data);
         node._children = node.children!.map((_: any) => _);
         this.loadingList[index].loading = false;
       } else {
@@ -90,6 +101,8 @@ export default class Tree extends Vue {
           node._children = node.children!.map((_) => _);
         }
       }
+    } else {
+      this.nodeLists.splice(index, this.nodeLists.length - index);
     }
 
     this.scroll(index);
@@ -98,24 +111,40 @@ export default class Tree extends Vue {
   }
 
   public scroll(index: number) {
-    const nodeListWidth = this.$refs.nodeList.$el.clientWidth;
     setTimeout(() => {
-      this.$el.scrollTo({left: nodeListWidth * index, top: 0, behavior: 'smooth'});
+      const nodeListWidth = this.$refs.nodeList.$el.clientWidth;
+      const scrollWidth = this.$el.scrollWidth;
+      const clientWidth = this.$el.clientWidth;
+      this.$el.scrollTo({
+        left: scrollWidth - (
+            clientWidth + nodeListWidth * (this.nodeLists.length - index + 1 ? this.nodeLists.length - index + 1 : 0)
+        ),
+        top: 0,
+        behavior: 'smooth',
+      });
       this.refreshNodeList(index);
     }, 100);
   }
+
   public refreshNodeList(index: number) {
-    this.$refs.nodeLists[index].refresh();
+    if (index < this.nodeLists.length) {
+      this.$refs.nodeLists[index].refresh();
+    }
+  }
+
+  public created() {
+    this.value = this.data.map((_) => _);
+    nodeBackup.push(this.data.map((_) => _));
   }
 }
 </script>
 
 <style scoped lang="stylus">
 .Tree {
-  display flex
   height 100%
   width 100%
-  overflow auto
+  overflow-x auto
+  display flex
   border 1px solid #e8ecef
   border-right none
 }

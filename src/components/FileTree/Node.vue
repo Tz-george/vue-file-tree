@@ -1,23 +1,33 @@
 <template lang="pug">
-  .Node(:class="classType" @click="click")
+  .Node(:class="[typeClass, nodeClass]" @click="click")
     .text(:title="node.name") {{ node.name }}
 </template>
 
 <script lang="ts">
-import {Component, Prop, Emit, Vue} from 'vue-property-decorator';
+import {Component, Prop, Emit, Vue, Provide, Inject, InjectReactive} from 'vue-property-decorator';
 import {Node as NodeInfo} from './classDef';
 
 @Component
 export default class Node extends Vue {
   @Prop({type: Object, required: true}) public node!: NodeInfo;
 
-  get classType() {
+  get typeClass() {
     if (this.node.isLeaf) {
       return 'file';
     } else {
       return 'dir';
     }
   }
+
+  get nodeClass() {
+    return {
+      inPath: this.nodeLists.indexOf(this.node) !== -1,
+      nowNode: this.nowNode === this.node,
+    };
+  }
+
+  @Inject() private readonly nodeLists!: NodeInfo[];
+  @InjectReactive() private nowNode!: NodeInfo;
 
   @Emit('click') public click(event: MouseEvent) {
     return event;
@@ -61,6 +71,15 @@ export default class Node extends Vue {
 .file {
   &::before {
    mask-image url("./images/file.png")
+  }
+}
+.inPath {
+  background-color #d4d5d5
+}
+.nowNode {
+  background-color #0849d9
+  /deep/.text {
+    color white
   }
 }
 </style>

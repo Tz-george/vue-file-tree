@@ -3,8 +3,9 @@
     .titleBar
       .path(:title="nodePath") {{ nodePath }}
       Searcher(v-if="hasSearcher" ref="searcher" @search="search(value, $event)")
-    Node(v-for="(node, index) in value.children" :key="index" :node="node" @click="click(node)")
-    .emptyText(v-show="value.children.length === 0") {{ emptyText }}
+    .list
+      .emptyText(v-show="value.children && value.children.length === 0 || !value.children") {{ emptyText }}
+      Node(v-for="(node, index) in value.children" :key="index" :node="node" @click="click(node)")
 </template>
 
 <script lang="ts">
@@ -67,6 +68,7 @@ export default class NodeList extends Vue {
 
 <style scoped lang="stylus">
 .NodeList {
+  height 100%
   border-right 1px solid #e8ecef
   width 30%
   flex-shrink 0
@@ -79,6 +81,11 @@ export default class NodeList extends Vue {
   height 50px
   padding 0 10px
   box-sizing border-box
+}
+
+.list {
+  height calc(100% - 50px)
+  overflow-y auto
 }
 
 .path {
